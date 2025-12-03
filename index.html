@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸福墙 - 珍藏美好瞬间</title>
+    <style>
+        :root {
+            --pink: #FF9BB3;
+            --blue: #BDE0FE;
+            --yellow: #FFF2CC;
+            --purple: #C8A2C8;
+            --white: #FFFFFF;
+            --bg: #FFF9F9;
+            --shadow: rgba(255, 155, 179, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Microsoft YaHei', '幼圆', sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg);
+            min-height: 100vh;
+            padding: 20px;
+            background-image: 
+                radial-gradient(var(--blue) 2px, transparent 2px),
+                radial-gradient(var(--blue) 2px, var(--bg) 2px),
+                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895-2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895-2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895-2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895-2 2 2z' fill='%23FF9BB3' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-size: 40px 40px, 40px 40px, 200px 200px;
+            background-position: 0 0, 20px 20px, 0 0;
+            background-attachment: fixed;
+        }
+        
+        /* 漂浮元素动画 */
+        .floating {
+            position: fixed;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: -1;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .floating:nth-child(even) {
+            animation-delay: 2s;
+        }
+        
+        .floating:nth-child(3n) {
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 15px 30px var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 5px solid var(--pink);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "✧･ﾟ: *✧･ﾟ:*";
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            color: var(--purple);
+            font-size: 14px;
+        }
+        
+        .container::after {
+            content: "*:･ﾟ✧*:･ﾟ✧";
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            color: var(--purple);
+            font-size: 14px;
+        }
+        
+        /* 云朵装饰 */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.2;
+            z-index: -1;
+        }
+        
+        .cloud-1 {
+            width: 100px;
+            height: 60px;
+            top: 50px;
+            left: 100px;
+            box-shadow: 
+                60px -20px 0 0 white,
+                120px 0 0 0 white;
+        }
+        
+        .cloud-2 {
+            width: 80px;
+            height: 50px;
+            bottom: 50px;
+            right: 100px;
+            box-shadow: 
+                50px -15px 0 0 white,
+                100px 0 0 0 white;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(200, 162, 200, 0.3);
+            position: relative;
+        }
+        
+        h1::after {
+            content: "🌸🌸🌸";
+            display: block;
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+            background-color: var(--yellow);
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: 2px dashed var(--pink);
+            position: relative;
+        }
+        
+        .subtitle::before {
+            content: "💖";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .subtitle::after {
+            content: "💖";
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .upload-section {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, var(--pink), #FF7A9E);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 155, 179, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            border: 3px solid white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-btn::before {
+            content: "✨";
+            position: absolute;
+            left: 20px;
+            animation: sparkle 2s infinite;
+        }
+        
+        .upload-btn::after {
+            content: "✨";
+            position: absolute;
+            right: 20px;
+            animation: sparkle 2s infinite reverse;
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(255, 155, 179, 0.5);
+        }
+        
+        .upload-btn svg {
+            width: 28px;
+            height: 28px;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+        
+        .media-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 15px var(--shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            aspect-ratio: 1/1;
+            border: 5px solid var(--white);
+            transform: rotate(-2deg);
+        }
+        
+        .media-card::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: var(--yellow);
+            border-radius: 50%;
+            opacity: 0.5;
+            z-index: 1;
+        }
+        
+        .media-card:nth-child(even) {
+            transform: rotate(2deg);
+        }
+        
+        .media-card:hover {
+            transform: translateY(-15px) rotate(0deg) scale(1.05);
+            box-shadow: 0 20px 30px rgba(255, 155, 179, 0.3);
+        }
+        
+        .media-content {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 15px;
+        }
+        
+        .media-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .media-card:hover .media-overlay {
+            opacity: 1;
+        }
+        
+        .play-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--pink);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--pink);
+            border: 3px solid white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+        
+        .media-card:hover .delete-btn {
+            opacity: 1;
+        }
+        
+        .delete-btn:hover {
+            background: #FF7A9E;
+            transform: scale(1.1);
+        }
+        
+        /* 上传时间样式 */
+        .upload-time {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #666;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .media-card:hover .upload-time {
+            opacity: 1;
+        }
+        
+        /* 模态框中的时间显示 */
+        .modal-time {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+            background: var(--yellow);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            border: 1px dashed var(--pink);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+        
+        .empty-state img {
+            max-width: 250px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+        }
+        
+        .empty-state h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--pink);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+            background-color: var(--yellow);
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: inline-block;
+            border: 2px dashed var(--pink);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+            background: white;
+            padding: 20px;
+            border-radius: 30px;
+            border: 8px solid var(--pink);
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .modal-media {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 5px solid white;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background: var(--pink);
+            border: 5px solid white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        
+        .close-modal:hover {
+            background: #FF7A9E;
+            transform: scale(1.1);
+        }
+        
+        .upload-progress {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px 45px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px var(--shadow);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            gap: 20px;
+            border: 5px solid var(--pink);
+        }
+        
+        .loader {
+            width: 30px;
+            height: 30px;
+            border: 4px solid var(--pink);
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            animation: loader 1s linear infinite;
+        }
+        
+        @keyframes loader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .upload-progress span {
+            font-size: 1.2rem;
+            color: var(--pink);
+            font-weight: bold;
+        }
+        
+        /* 装饰元素 */
+        .decor {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .decor-1 {
+            top: 50px;
+            left: 50px;
+            transform: rotate(15deg);
+        }
+        
+        .decor-2 {
+            bottom: 50px;
+            right: 50px;
+            transform: rotate(-15deg);
+        }
+        
+        .decor-3 {
+            top: 50%;
+            left: 20px;
+            transform: rotate(90deg);
+        }
+        
+        .decor-4 {
+            top: 50%;
+            right: 20px;
+            transform: rotate(-90deg);
+        }
+        
+        /* 保存提示 */
+        .save-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--pink);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(255, 155, 179, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            border: 3px solid white;
+        }
+        
+        .save-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                border-radius: 20px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 20px;
+            }
+            
+            .upload-btn {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+            
+            .modal-content {
+                padding: 15px;
+                border-width: 5px;
+            }
+            
+            .close-modal {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+                top: -15px;
+                right: -15px;
+            }
+            
+            .save-toast {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 漂浮可爱元素 -->
+    <div class="floating" style="top: 10%; left: 5%; font-size: 30px;">🌸</div>
+    <div class="floating" style="top: 20%; right: 10%; font-size: 25px;">💖</div>
+    <div class="floating" style="top: 30%; left: 15%; font-size: 35px;">✨</div>
+    <div class="floating" style="top: 40%; right: 5%; font-size: 20px;">☁️</div>
+    <div class="floating" style="top: 50%; left: 20%; font-size: 30px;">🍭</div>
+    <div class="floating" style="top: 60%; right: 15%; font-size: 25px;">🎀</div>
+    <div class="floating" style="top: 70%; left: 10%; font-size: 30px;">🦄</div>
+    <div class="floating" style="top: 80%; right: 20%; font-size: 20px;">🍬</div>
+    
+    <div class="container">
+        <!-- 云朵装饰 -->
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        
+        <!-- 装饰元素 -->
+        <div class="decor decor-1">🌸</div>
+        <div class="decor decor-2">💖</div>
+        <div class="decor decor-3">✦</div>
+        <div class="decor decor-4">✧</div>
+        
+        <header>
+            <h1>幸福墙</h1>
+            <p class="subtitle">上传并珍藏生活中的美好瞬间，打造属于你的回忆画廊</p>
+        </header>
+        
+        <section class="upload-section">
+            <button class="upload-btn" id="uploadBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                上传照片或视频
+            </button>
+            <input type="file" id="file-input" accept="image/*,video/*" multiple>
+        </section>
+        
+        <div class="gallery" id="gallery">
+            <div class="empty-state" id="emptyState">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxyZWN0IHdpZHRoPSIyNTAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZmZmIi8+PC9yZWN0PjxwYXRoIGQ9Ik0xMjUgMTUwQzE2MC45IDE1MCAxOTAgMTIwIDE5MCA4NUMxOTAgNDkuMSAxNjAuOSAyMCAxMjUgMjBDODkuMSAyMCA2MCA0OS4xIDYwIDg1QzYwIDEyMCA4OS4xIDE1MCAxMjUgMTUwWiIgZmlsbD0iI0ZGOTJCMCIvPjxwYXRoIGQ9Ik0xMjUgMTMwQzE1My4zIDEzMCAxNzUgMTA4LjMgMTc1IDgwQzE3NSA1MS43IDE1My4zIDMwIDEyNSAzMEM5Ni43IDMwIDc1IDUxLjcgNzUgODBDNzUgMTA4LjMgOTYuNyAxMzAgMTI1IDEzMFoiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI3NSIgcj0iMTAiIGZpbGw9IiM2NjYiLz48Y2lyY2xlIGN4PSIxNTAiIGN5PSI3NSIgcj0iMTAiIGZpbGw9IiM2NjYiLz48cGF0aCBkPSJNMTI1IDEwNUMxMzMuMyAxMDUgMTQwIDk4LjMgMTQwIDkwQzE0MCA4MS43IDEzMy4zIDc1IDEyNSA3NUMxMTYuNyA3NSAxMTAgODEuNyAxMTAgOTBDMTEwIDk4LjMgMTE2LjcgMTA1IDEyNSAxMDVaIiBmaWxsPSIjNjY2Ii8+PC9zdmc+" alt="Empty">
+                <h3>还没有上传任何内容哦～</h3>
+                <p>点击上方按钮开始上传你的美好回忆 💖</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="previewModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <div id="modalMediaContainer"></div>
+            <div id="modalTimeContainer"></div>
+        </div>
+    </div>
+    
+    <div class="upload-progress" id="uploadProgress">
+        <div class="loader"></div>
+        <span>处理中...✨</span>
+    </div>
+    
+    <!-- 保存提示 -->
+    <div class="save-toast" id="saveToast">
+        <span>💾 已自动保存你的回忆</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM元素
+            const uploadBtn = document.getElementById('uploadBtn');
+            const fileInput = document.getElementById('file-input');
+            const gallery = document.getElementById('gallery');
+            const emptyState = document.getElementById('emptyState');
+            const previewModal = document.getElementById('previewModal');
+            const modalMediaContainer = document.getElementById('modalMediaContainer');
+            const modalTimeContainer = document.getElementById('modalTimeContainer');
+            const closeModal = document.getElementById('closeModal');
+            const uploadProgress = document.getElementById('uploadProgress');
+            const saveToast = document.getElementById('saveToast');
+            
+            // 存储媒体数据
+            let mediaItems = [];
+            const STORAGE_KEY = 'happyWallMediaItems';
+            
+            // 初始化
+            init();
+            
+            function init() {
+                // 从本地存储加载数据
+                loadFromLocalStorage();
+                
+                // 绑定事件
+                uploadBtn.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', handleFileUpload);
+                closeModal.addEventListener('click', closePreviewModal);
+                previewModal.addEventListener('click', (e) => {
+                    if (e.target === previewModal) closePreviewModal();
+                });
+                
+                // 键盘事件
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && previewModal.classList.contains('active')) {
+                        closePreviewModal();
+                    }
+                });
+                
+                // 检查是否有存储的媒体
+                checkEmptyState();
+            }
+            
+            // 从本地存储加载数据
+            function loadFromLocalStorage() {
+                try {
+                    const savedData = localStorage.getItem(STORAGE_KEY);
+                    if (savedData) {
+                        const parsedData = JSON.parse(savedData);
+                        mediaItems = parsedData;
+                        
+                        // 重新创建所有卡片
+                        mediaItems.forEach(item => {
+                            // 重新创建Object URL
+                            if (item.dataUrl) {
+                                createMediaCard(
+                                    item.id, 
+                                    item.dataUrl, 
+                                    item.type === 'video', 
+                                    item.name, 
+                                    item.uploadTime
+                                );
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('加载本地存储失败:', error);
+                }
+            }
+            
+            // 保存到本地存储
+            function saveToLocalStorage() {
+                try {
+                    // 准备要保存的数据（移除临时URL）
+                    const saveData = mediaItems.map(item => ({
+                        id: item.id,
+                        type: item.type,
+                        name: item.name,
+                        uploadTime: item.uploadTime,
+                        dataUrl: item.url // 保存base64数据
+                    }));
+                    
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+                    
+                    // 显示保存提示
+                    showSaveToast();
+                } catch (error) {
+                    console.error('保存到本地存储失败:', error);
+                }
+            }
+            
+            // 显示保存提示
+            function showSaveToast() {
+                saveToast.classList.add('show');
+                setTimeout(() => {
+                    saveToast.classList.remove('show');
+                }, 2000);
+            }
+            
+            // 格式化日期时间
+            function formatDateTime(timestamp) {
+                const date = new Date(timestamp);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                
+                return `${year}-${month}-${day} ${hours}:${minutes}`;
+            }
+            
+            // 文件转Base64
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (error) => reject(error);
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            // 处理文件上传
+            async function handleFileUpload(e) {
+                const files = Array.from(e.target.files);
+                if (files.length === 0) return;
+                
+                // 显示进度
+                uploadProgress.style.display = 'flex';
+                
+                // 处理每个文件
+                try {
+                    for (const file of files) {
+                        await processFile(file);
+                    }
+                    
+                    // 保存到本地存储
+                    saveToLocalStorage();
+                    
+                    uploadProgress.style.display = 'none';
+                    fileInput.value = ''; // 重置input
+                } catch (error) {
+                    console.error('处理文件失败:', error);
+                    uploadProgress.style.display = 'none';
+                }
+            }
+            
+            // 处理单个文件
+            async function processFile(file) {
+                const isVideo = file.type.startsWith('video/');
+                const isImage = file.type.startsWith('image/');
+                const uploadTime = Date.now(); // 获取当前时间戳
+                
+                if (!isImage && !isVideo) return;
+                
+                // 将文件转换为Base64
+                const dataUrl = await fileToBase64(file);
+                
+                // 创建媒体项
+                const mediaId = generateId();
+                mediaItems.push({
+                    id: mediaId,
+                    url: dataUrl, // 使用Base64 URL
+                    type: isVideo ? 'video' : 'image',
+                    name: file.name,
+                    uploadTime: uploadTime,
+                    dataUrl: dataUrl // 保存Base64数据
+                });
+                
+                // 创建卡片元素
+                createMediaCard(mediaId, dataUrl, isVideo, file.name, uploadTime);
+                
+                // 更新空状态
+                checkEmptyState();
+            }
+            
+            // 创建媒体卡片
+            function createMediaCard(id, url, isVideo, name, uploadTime) {
+                // 创建卡片元素
+                const card = document.createElement('div');
+                card.className = 'media-card';
+                card.dataset.id = id;
+                
+                // 创建媒体内容
+                const mediaContent = document.createElement(isVideo ? 'video' : 'img');
+                mediaContent.className = 'media-content';
+                mediaContent.src = url;
+                
+                if (isVideo) {
+                    mediaContent.muted = true;
+                    mediaContent.playsInline = true;
+                    mediaContent.preload = 'metadata';
+                    
+                    // 添加视频覆盖层
+                    const overlay = document.createElement('div');
+                    overlay.className = 'media-overlay';
+                    overlay.innerHTML = '<div class="play-icon">▶</div>';
+                    card.appendChild(overlay);
+                } else {
+                    mediaContent.alt = name;
+                    mediaContent.loading = 'lazy';
+                }
+                
+                // 添加上传时间显示
+                const timeElement = document.createElement('div');
+                timeElement.className = 'upload-time';
+                timeElement.textContent = formatDateTime(uploadTime);
+                card.appendChild(timeElement);
+                
+                // 删除按钮
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteMediaItem(id, card);
+                });
+                
+                // 预览点击事件
+                card.addEventListener('click', () => {
+                    openPreviewModal(url, isVideo, name, uploadTime);
+                });
+                
+                // 组装卡片
+                card.appendChild(mediaContent);
+                card.appendChild(deleteBtn);
+                
+                // 添加到画廊（在空状态前）
+                gallery.insertBefore(card, emptyState);
+            }
+            
+            // 删除媒体项
+            function deleteMediaItem(id, cardElement) {
+                // 从数组中移除
+                const index = mediaItems.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    mediaItems.splice(index, 1);
+                    
+                    // 更新本地存储
+                    saveToLocalStorage();
+                }
+                
+                // 添加删除动画
+                cardElement.style.transform = 'scale(0.8) rotate(0deg)';
+                cardElement.style.opacity = '0';
+                setTimeout(() => {
+                    cardElement.remove();
+                    // 更新空状态
+                    checkEmptyState();
+                }, 300);
+            }
+            
+            // 打开预览模态框
+            function openPreviewModal(url, isVideo, name, uploadTime) {
+                modalMediaContainer.innerHTML = '';
+                modalTimeContainer.innerHTML = '';
+                
+                const mediaElement = document.createElement(isVideo ? 'video' : 'img');
+                mediaElement.className = 'modal-media';
+                mediaElement.src = url;
+                
+                if (isVideo) {
+                    mediaElement.controls = true;
+                    mediaElement.autoplay = true;
+                    mediaElement.playsInline = true;
+                } else {
+                    mediaElement.alt = name;
+                }
+                
+                modalMediaContainer.appendChild(mediaElement);
+                
+                // 添加模态框中的时间显示
+                const timeElement = document.createElement('div');
+                timeElement.className = 'modal-time';
+                timeElement.innerHTML = `<span>上传时间：</span>${formatDateTime(uploadTime)}`;
+                modalTimeContainer.appendChild(timeElement);
+                
+                previewModal.classList.add('active');
+            }
+            
+            // 关闭预览模态框
+            function closePreviewModal() {
+                // 暂停视频
+                const video = modalMediaContainer.querySelector('video');
+                if (video) video.pause();
+                
+                previewModal.classList.remove('active');
+                modalMediaContainer.innerHTML = '';
+                modalTimeContainer.innerHTML = '';
+            }
+            
+            // 检查空状态
+            function checkEmptyState() {
+                if (mediaItems.length > 0) {
+                    emptyState.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'block';
+                }
+            }
+            
+            // 生成唯一ID
+            function generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+            
+            // 错误处理
+            window.addEventListener('error', function(e) {
+                console.error('Media load error:', e.target.src);
+                if (e.target.tagName === 'IMG') {
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxyZWN0IHdpZHRoPSIyNTAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZmZmIi8+PC9yZWN0PjxwYXRoIGQ9Ik0xMjUgMTUwQzE2MC45IDE1MCAxOTAgMTIwIDE5MCA4NUMxOTAgNDkuMSAxNjAuOSAyMCAxMjUgMjBDODkuMSAyMCA2MCA0OS4xIDYwIDg1QzYwIDEyMCA4OS4xIDE1MCAxMjUgMTUwWiIgZmlsbD0iI0ZGOTJCMCIvPjxwYXRoIGQ9Ik0xMjUgMTMwQzE1My4zIDEzMCAxNzUgMTA4LjMgMTc1IDgwQzE3NSA1MS43IDE1My4zIDMwIDEyNSAzMEM5Ni43IDMwIDc1IDUxLjcgNzUgODBDNzUgMTA4LjMgOTYuNyAxMzAgMTI1IDEzMFoiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI3NSIgcj0iMTAiIGZpbGw9IiM2NjYiLz48Y2lyY2xlIGN4PSIxNTAiIGN5PSI3NSIgcj0iMTAiIGZpbGw9IiM2NjYiLz48cGF0aCBkPSJNMTI1IDEwNUMxMzMuMyAxMDUgMTQwIDk4LjMgMTQwIDkwQzE0MCA4MS43IDEzMy4zIDc1IDEyNSA3NUMxMTYuNyA3NSAxMTAgODEuNyAxMTAgOTBDMTEwIDk4LjMgMTE2LjcgMTA1IDEyNSAxMDVaIiBmaWxsPSIjNjY2Ii8+PC9zdmc+';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
