@@ -1,0 +1,21 @@
+name: 同步照片到目标仓库
+on:
+  push:
+    branches: [main]  # 源仓库main分支有新提交时触发同步
+    paths: ["photos/**"]  # 仅当photos文件夹有变化时触发
+  workflow_dispatch:  # 允许手动触发同步
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取源仓库代码
+        uses: actions/checkout@v4
+
+      - name: 执行文件同步
+        uses: step-security/repo-file-sync-action@v1
+        with:
+          gh_pat: ${{ secrets.GH_PAT }}  # 之前配置的GH_PAT密钥
+          source_repo_path: "photos/"  # 源仓库要同步的文件夹
+          sunjian8989/20251117: "你的用户名/目标仓库名"  # 目标仓库（如另一相册仓库）
+          destination_repo_path: "photos/"  # 目标仓库的接收文件夹
