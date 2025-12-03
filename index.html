@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸福墙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "幼圆", "微软雅黑", sans-serif;
+        }
+
+        /* 三丽鸥主题色+动态渐变 */
+        :root {
+            --melody: #FF9BB3; /* 美乐蒂粉 */
+            --cinnamoroll: #BDE0FE; /* 玉桂狗蓝 */
+            --pompompurin: #FFF2CC; /* 布丁狗黄 */
+            --kuromi: #C8A2C8; /* 库洛米紫 */
+            --bg: #FFF9FB;
+        }
+
+        body {
+            background-color: var(--bg);
+            min-height: 100vh;
+            padding: 20px;
+            /* 背景底纹 */
+            background-image: 
+                radial-gradient(var(--cinnamoroll) 1px, transparent 1px),
+                radial-gradient(var(--cinnamoroll) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            overflow-x: hidden;
+        }
+
+        /* 三丽鸥边角贴纸（固定定位） */
+        .sanrio-sticker {
+            position: fixed;
+            width: 120px;
+            z-index: 10;
+            opacity: 0.9;
+            transition: transform 0.3s ease;
+        }
+        .sanrio-sticker:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .sticker-kitty { top: 20px; right: 20px; }
+        .sticker-cinna { bottom: 20px; left: 20px; }
+        .sticker-kuromi { top: 50%; left: -20px; transform: translateY(-50%); }
+        .sticker-purin { bottom: 50%; right: -20px; transform: translateY(50%); }
+
+        /* 页面容器（毛玻璃+圆角） */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 30px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(255, 155, 179, 0.2);
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        /* 标题（动态渐变+装饰） */
+        h1 {
+            color: var(--melody);
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(200, 162, 200, 0.3);
+            background: linear-gradient(90deg, var(--melody), var(--kuromi));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+        h1::before {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 8px;
+            background-color: var(--pompompurin);
+            border-radius: 4px;
+        }
+
+        /* 上传区域（胶囊按钮+动效） */
+        .upload-area {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        #photo-input {
+            display: none;
+        }
+        .upload-btn {
+            background: linear-gradient(135deg, var(--melody), #FF7A9E);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 15px rgba(255, 155, 179, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-btn::before {
+            content: "📸 点击上传幸福瞬间";
+        }
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 155, 179, 0.5);
+        }
+        .upload-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 2s infinite;
+        }
+        @keyframes shine {
+            100% { left: 100%; }
+        }
+
+        /* 照片轮播背景（分层+随机动效） */
+        .photo-carousel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            padding: 80px;
+            gap: 30px;
+            pointer-events: none;
+        }
+        .carousel-img {
+            width: calc(100px + 50 * Math.random());
+            height: calc(100px + 50 * Math.random());
+            object-fit: cover;
+            border-radius: 8px;
+            transform: rotate(calc(-10deg + 20 * Math.random())) scale(0.9);
+            animation: float 15s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: rotate(calc(-10deg + 20 * Math.random())) translateY(0) scale(0.9); }
+            50% { transform: rotate(calc(-10deg + 20 * Math.random())) translateY(-20px) scale(1); }
+        }
+
+        /* 照片墙（个性相框+错落布局） */
+        .photo-wall {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px;
+            position: relative;
+            z-index: 2;
+            padding: 10px;
+        }
+        .photo-item {
+            width: 100%;
+            aspect-ratio: 4/3;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            /* 立体相框（多层阴影+贴纸装饰） */
+            padding: 12px;
+            background: white;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.05),
+                0 0 0 2px var(--cinnamoroll),
+                0 0 0 8px white,
+                0 0 0 10px var(--pompompurin);
+        }
+        /* 照片角落小贴纸 */
+        .photo-item::after {
+            content: "";
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background-image: url("https://img.icons8.com/fluency/30/000000/hello-kitty.png");
+            background-size: cover;
+            opacity: 0.8;
+        }
+        .photo-item:hover {
+            transform: translateY(-8px) rotate(2deg);
+            box-shadow: 
+                0 12px 20px rgba(0,0,0,0.1),
+                0 0 0 2px var(--melody),
+                0 0 0 8px white,
+                0 0 0 10px var(--kuromi);
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* 删除按钮 */
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255, 99, 71, 0.8);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 5;
+            opacity: 0;
+        }
+        .photo-item:hover .delete-btn {
+            opacity: 1;
+        }
+        .delete-btn:hover {
+            background-color: #FF4500;
+            transform: scale(1.1);
+        }
+
+        /* 查看弹窗（丝滑动画+相框） */
+        .photo-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            /* 弹窗相框 */
+            padding: 20px;
+            background: linear-gradient(135deg, var(--pompompurin), white);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        .modal-content::after {
+            content: "";
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-image: url("https://img.icons8.com/fluency/50/000000/cinnamoroll.png");
+            background-size: cover;
+        }
+        .modal-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 8px solid white;
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2.8rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .close-modal:hover {
+            transform: scale(1.2);
+            color: var(--melody);
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .sanrio-sticker { width: 80px; }
+            h1 { font-size: 2rem; }
+            .upload-btn { padding: 12px 30px; font-size: 1rem; }
+            .photo-wall { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 三丽鸥边角贴纸 -->
+    <img src="https://img.icons8.com/fluency/128/000000/hello-kitty.png" class="sanrio-sticker sticker-kitty" alt="Hello Kitty">
+    <img src="https://img.icons8.com/fluency/128/000000/cinnamoroll.png" class="sanrio-sticker sticker-cinna" alt="玉桂狗">
+    <img src="https://img.icons8.com/fluency/128/000000/kuromi.png" class="sanrio-sticker sticker-kuromi" alt="库洛米">
+    <img src="https://img.icons8.com/fluency/128/000000/pompompurin.png" class="sanrio-sticker sticker-purin" alt="布丁狗">
+
+    <div class="container">
+        <h1>幸福墙</h1>
+
+        <!-- 上传区域 -->
+        <div class="upload-area">
+            <label for="photo-input" class="upload-btn"></label>
+            <input type="file" id="photo-input" accept="image/*" multiple>
+        </div>
+
+        <!-- 照片轮播背景 -->
+        <div class="photo-carousel" id="carousel"></div>
+
+        <!-- 照片墙 -->
+        <div class="photo-wall" id="photoWall"></div>
+    </div>
+
+    <!-- 查看弹窗 -->
+    <div class="photo-modal" id="modal">
+        <span class="close-modal" id="closeModal">&times;</span>
+        <div class="modal-content" id="modalImage"></div>
+    </div>
+
+    <script>
+        const photoInput = document.getElementById('photo-input');
+        const photoWall = document.getElementById('photoWall');
+        const carousel = document.getElementById('carousel');
+        const modal = document.getElementById('modal');
+        const modalImage = document.getElementById('modalImage');
+        const closeModal = document.getElementById('closeModal');
+
+        // 存储照片（用数组优化读取）
+        let photoList = [];
+
+        // 上传照片（优化性能：批量处理+延迟加载）
+        photoInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            // 分批处理（避免同时加载过多图片）
+            const batchProcess = (batch) => {
+                batch.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const imgSrc = event.target.result;
+                            photoList.push(imgSrc);
+                            
+                            // 添加到照片墙
+                            const photoItem = document.createElement('div');
+                            photoItem.className = 'photo-item';
+                            photoItem.innerHTML = `
+                                <button class="delete-btn">&times;</button>
+                                <img src="${imgSrc}" alt="幸福瞬间">
+                            `;
+                            photoWall.appendChild(photoItem);
+
+                            // 添加到轮播背景（延迟100ms避免卡顿）
+                            setTimeout(() => {
+                                const carouselImg = document.createElement('img');
+                                carouselImg.className = 'carousel-img';
+                                carouselImg.src = imgSrc;
+                                carousel.appendChild(carouselImg);
+                            }, 100);
+
+                            // 点击查看
+                            photoItem.addEventListener('click', (e) => {
+                                if (e.target !== photoItem.querySelector('.delete-btn')) {
+                                    modalImage.innerHTML = `<img src="${imgSrc}" alt="查看照片">`;
+                                    modal.style.display = 'flex';
+                                }
+                            });
+
+                            // 删除照片
+                            photoItem.querySelector('.delete-btn').addEventListener('click', (e) => {
+                                e.stopPropagation(); // 阻止事件冒泡
+                                const index = photoList.indexOf(imgSrc);
+                                if (index !== -1) {
+                                    photoList.splice(index, 1);
+                                }
+                                photoItem.remove();
+                                
+                                // 同时删除轮播中的对应图片
+                                const carouselImages = carousel.querySelectorAll('.carousel-img');
+                                carouselImages.forEach((img, i) => {
+                                    if (img.src === imgSrc) {
+                                        img.remove();
+                                    }
+                                });
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            };
+
+            // 每批处理5张，间隔200ms
+            const batchSize = 5;
+            for (let i = 0; i < files.length; i += batchSize) {
+                const batch = files.slice(i, i + batchSize);
+                setTimeout(() => batchProcess(batch), i / batchSize * 200);
+            }
+        });
+
+        // 关闭弹窗（优化交互）
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+        // 按ESC关闭
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') modal.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
