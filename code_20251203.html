@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用照片垒起的幸福墙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #ff8a80;
+            --primary-light: #ffccbc;
+            --secondary: #a5d6a7;
+            --background: #faf6ed;
+            --card-bg: #ffffff;
+            --text-dark: #37474f;
+            --text-light: #78909c;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: var(--background);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding-bottom: 4rem;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23faf6ed' fill-opacity='1' d='M0,192L48,181.3C96,171,192,149,288,160C384,171,480,213,576,213.3C672,213,768,171,864,160C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.8rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        .upload-section {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2.5rem;
+            text-align: center;
+            border: 1px solid #f0e6d2;
+        }
+        
+        .upload-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .upload-section p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(255, 138, 128, 0.3);
+        }
+        
+        .upload-btn:hover {
+            background: #ff6e64;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 138, 128, 0.4);
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .album-filter {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 2rem 0;
+        }
+        
+        .filter-btn {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(255, 138, 128, 0.2);
+        }
+        
+        .filter-btn:hover:not(.active) {
+            border-color: var(--primary-light);
+            color: var(--primary);
+            background-color: #fff8f7;
+        }
+        
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .photo-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            border: 1px solid #f0e6d2;
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .photo-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .photo-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .photo-card:hover .photo-img {
+            transform: scale(1.05);
+        }
+        
+        .photo-info {
+            padding: 1.2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .photo-date {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .photo-date i {
+            font-size: 0.8rem;
+        }
+        
+        .photo-desc {
+            font-size: 1rem;
+            color: var(--text-dark);
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-img {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+            z-index: 10;
+        }
+        
+        .close-modal:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-info {
+            padding: 1.5rem;
+            background: white;
+        }
+        
+        .modal-date {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .modal-desc {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 0;
+            color: var(--text-light);
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px dashed #e0e0e0;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-light);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-light);
+            font-size: 1rem;
+            border-top: 1px solid #f0e6d2;
+            margin-top: 3rem;
+        }
+        
+        .heart {
+            color: var(--primary);
+            animation: pulse 1.5s infinite;
+            margin: 0 0.3rem;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 照片描述编辑 */
+        .edit-desc {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 5;
+        }
+        
+        .photo-card:hover .edit-desc {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .edit-form {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            z-index: 2000;
+            width: 90%;
+            max-width: 500px;
+            display: none;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        
+        .edit-form.active {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        
+        .edit-form h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 138, 128, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 0.9rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 138, 128, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: #ff6e64;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 138, 128, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: var(--text-dark);
+        }
+        
+        .btn-secondary:hover {
+            background: #e9e9e9;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+            display: none;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+        
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* 加载动画 */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .upload-section {
+                padding: 1.5rem;
+            }
+            
+            .upload-btn {
+                padding: 0.9rem 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .photo-gallery {
+                gap: 1.5rem;
+            }
+            
+            .photo-card {
+                height: 280px;
+            }
+            
+            .photo-img {
+                height: 180px;
+            }
+            
+            .modal-info {
+                padding: 1.2rem;
+            }
+            
+            .modal-desc {
+                font-size: 1.1rem;
+            }
+            
+            .edit-form {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    <!-- 引入图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>用照片垒起的幸福墙 <i class="fas fa-heart heart"></i></h1>
+        <p class="subtitle">每一张照片，都是我们幸福的见证</p>
+    </header>
+    
+    <div class="container">
+        <div class="upload-section">
+            <h2>添加新的幸福瞬间</h2>
+            <p>上传照片，让幸福墙更加丰满</p>
+            <label for="file-input" class="upload-btn">
+                <i class="fas fa-upload"></i> 上传照片
+            </label>
+            <input type="file" id="file-input" accept="image/*" multiple>
+            
+            <div class="album-filter">
+                <button class="filter-btn active" data-album="all">全部幸福</button>
+                <button class="filter-btn" data-album="daily">日常点滴</button>
+                <button class="filter-btn" data-album="travel">旅行时光</button>
+                <button class="filter-btn" data-album="special">特殊日子</button>
+                <button class="filter-btn" data-album="food">美食分享</button>
+            </div>
+        </div>
+        
+        <div class="photo-gallery" id="photoGallery">
+            <!-- 照片会在这里动态生成 -->
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-images"></i>
+                <h3>幸福墙还很空呢</h3>
+                <p>上传你们的第一张照片，开始垒起属于你们的幸福吧！</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 查看照片模态框 -->
+    <div class="modal" id="photoModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img class="modal-img" src="" alt="幸福瞬间">
+            <div class="modal-info">
+                <p class="modal-date"><i class="far fa-calendar-alt"></i> <span id="modal-date-text"></span></p>
+                <p class="modal-desc" id="modal-desc-text"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑照片描述的表单 -->
+    <div class="overlay" id="editOverlay"></div>
+    <div class="edit-form" id="editForm">
+        <h3>编辑幸福瞬间</h3>
+        <div class="form-group">
+            <label for="edit-date">日期</label>
+            <input type="date" id="edit-date" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="edit-desc">描述</label>
+            <textarea id="edit-desc" class="form-control" rows="3" placeholder="写下这张照片的故事..."></textarea>
+        </div>
+        <div class="form-group">
+            <label for="edit-album">幸福分类</label>
+            <select id="edit-album" class="form-control">
+                <option value="daily">日常点滴</option>
+                <option value="travel">旅行时光</option>
+                <option value="special">特殊日子</option>
+                <option value="food">美食分享</option>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelEdit">取消</button>
+            <button class="btn btn-primary" id="saveEdit">保存</button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 我们的幸福墙 | 用爱记录每一刻 <i class="fas fa-heart heart"></i></p>
+    </footer>
+
+    <script>
+        // DOM元素
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.querySelector('.upload-btn');
+        const photoGallery = document.getElementById('photoGallery');
+        const emptyState = document.getElementById('emptyState');
+        const photoModal = document.getElementById('photoModal');
+        const modalImg = document.querySelector('.modal-img');
+        const modalDateText = document.getElementById('modal-date-text');
+        const modalDescText = document.getElementById('modal-desc-text');
+        const closeModal = document.querySelector('.close-modal');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const editForm = document.getElementById('editForm');
+        const editOverlay = document.getElementById('editOverlay');
+        const cancelEdit = document.getElementById('cancelEdit');
+        const saveEdit = document.getElementById('saveEdit');
+        const editDate = document.getElementById('edit-date');
+        const editDesc = document.getElementById('edit-desc');
+        const editAlbum = document.getElementById('edit-album');
+        
+        // 存储照片数据
+        let photos = JSON.parse(localStorage.getItem('couplePhotos')) || [];
+        let currentPhotoId = null;
+        
+        // 初始化页面
+        init();
+        
+        function init() {
+            renderPhotos();
+            checkEmptyState();
+            
+            // 事件监听
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileUpload);
+            closeModal.addEventListener('click', closePhotoModal);
+            photoModal.addEventListener('click', (e) => {
+                if (e.target === photoModal) closePhotoModal();
+            });
+            
+            // 过滤按钮点击事件
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const album = btn.getAttribute('data-album');
+                    filterPhotos(album);
+                });
+            });
+            
+            // 编辑事件
+            cancelEdit.addEventListener('click', closeEditForm);
+            saveEdit.addEventListener('click', savePhotoEdit);
+            editOverlay.addEventListener('click', closeEditForm);
+        }
+        
+        // 渲染照片
+        function renderPhotos(filteredPhotos = null) {
+            const photosToRender = filteredPhotos || photos;
+            
+            // 清空相册
+            photoGallery.innerHTML = '';
+            
+            // 按日期倒序排列（最新的在前面）
+            photosToRender.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // 渲染每张照片
+            photosToRender.forEach(photo => {
+                const photoCard = document.createElement('div');
+                photoCard.className = 'photo-card';
+                photoCard.setAttribute('data-id', photo.id);
+                photoCard.setAttribute('data-album', photo.album);
+                
+                const date = new Date(photo.date);
+                const formattedDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+                
+                photoCard.innerHTML = `
+                    <img src="${photo.url}" alt="幸福瞬间" class="photo-img" loading="lazy">
+                    <div class="edit-desc" data-id="${photo.id}">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="photo-info">
+                        <div class="photo-date"><i class="far fa-calendar-alt"></i> ${formattedDate}</div>
+                        <div class="photo-desc">${photo.desc || '点击编辑添加故事'}</div>
+                    </div>
+                `;
+                
+                // 点击照片查看大图
+                photoCard.addEventListener('click', (e) => {
+                    if (e.target.closest('.edit-desc')) {
+                        // 点击编辑按钮
+                        openEditForm(photo.id);
+                    } else {
+                        // 点击照片查看
+                        openPhotoModal(photo);
+                    }
+                });
+                
+                // 淡入动画
+                photoCard.style.opacity = '0';
+                photoCard.style.transform = 'translateY(20px)';
+                photoGallery.appendChild(photoCard);
+                
+                setTimeout(() => {
+                    photoCard.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    photoCard.style.opacity = '1';
+                    photoCard.style.transform = 'translateY(0)';
+                }, 50);
+            });
+            
+            checkEmptyState(photosToRender.length);
+        }
+        
+        // 处理文件上传
+        function handleFileUpload(e) {
+            const files = e.target.files;
+            
+            if (files.length === 0) return;
+            
+            // 暂时禁用上传按钮，防止重复上传
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner loader"></i> 上传中...';
+            
+            setTimeout(() => {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    
+                    reader.onload = (event) => {
+                        // 创建新照片对象
+                        const newPhoto = {
+                            id: Date.now() + i, // 确保id唯一
+                            url: event.target.result,
+                            date: new Date().toISOString().split('T')[0], // 默认今天
+                            desc: '',
+                            album: 'daily' // 默认日常点滴
+                        };
+                        
+                        // 添加到照片数组
+                        photos.push(newPhoto);
+                        
+                        // 保存到本地存储
+                        savePhotosToLocalStorage();
+                        
+                        // 重新渲染
+                        renderPhotos();
+                        
+                        // 打开编辑表单（只打开第一张）
+                        if (i === 0) {
+                            setTimeout(() => {
+                                openEditForm(newPhoto.id);
+                            }, 300);
+                        }
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+                
+                // 恢复上传按钮状态
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-upload"></i> 上传照片';
+                
+                // 重置文件输入值，否则同一文件无法重复上传
+                fileInput.value = '';
+            }, 500);
+        }
+        
+        // 打开照片模态框
+        function openPhotoModal(photo) {
+            modalImg.src = photo.url;
+            const date = new Date(photo.date);
+            modalDateText.textContent = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+            modalDescText.textContent = photo.desc || '暂无描述';
+            
+            // 显示模态框并添加动画
+            photoModal.classList.add('active');
+            
+            // 防止滚动
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 关闭照片模态框
+        function closePhotoModal() {
+            photoModal.classList.remove('active');
+            
+            // 恢复滚动
+            setTimeout(() => {
+                document.body.style.overflow = 'auto';
+            }, 300);
+        }
+        
+        // 过滤照片
+        function filterPhotos(album) {
+            if (album === 'all') {
+                renderPhotos();
+            } else {
+                const filtered = photos.filter(photo => photo.album === album);
+                renderPhotos(filtered);
+            }
+        }
+        
+        // 检查空状态
+        function checkEmptyState(count = photos.length) {
+            if (count === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
+        }
+        
+        // 保存照片到本地存储
+        function savePhotosToLocalStorage() {
+            localStorage.setItem('couplePhotos', JSON.stringify(photos));
+        }
+        
+        // 打开编辑表单
+        function openEditForm(id) {
+            currentPhotoId = id;
+            const photo = photos.find(p => p.id === id);
+            
+            if (!photo) return;
+            
+            // 填充表单数据
+            editDate.value = photo.date;
+            editDesc.value = photo.desc || '';
+            editAlbum.value = photo.album;
+            
+            // 显示表单和遮罩层
+            editForm.classList.add('active');
+            editOverlay.classList.add('active');
+            
+            // 防止滚动
+            document.body.style.overflow = 'hidden';
+            
+            // 自动聚焦到描述框
+            setTimeout(() => {
+                editDesc.focus();
+            }, 300);
+        }
+        
+        // 关闭编辑表单
+        function closeEditForm() {
+            editForm.classList.remove('active');
+            editOverlay.classList.remove('active');
+            
+            // 恢复滚动
+            setTimeout(() => {
+                document.body.style.overflow = 'auto';
+            }, 300);
+            
+            currentPhotoId = null;
+        }
+        
+        // 保存照片编辑
+        function savePhotoEdit() {
+            if (currentPhotoId === null) return;
+            
+            const photoIndex = photos.findIndex(p => p.id === currentPhotoId);
+            
+            if (photoIndex === -1) return;
+            
+            // 更新照片数据
+            photos[photoIndex] = {
+                ...photos[photoIndex],
+                date: editDate.value,
+                desc: editDesc.value.trim(),
+                album: editAlbum.value
+            };
+            
+            // 保存到本地存储
+            savePhotosToLocalStorage();
+            
+            // 重新渲染
+            const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-album');
+            if (activeFilter === 'all') {
+                renderPhotos();
+            } else {
+                filterPhotos(activeFilter);
+            }
+            
+            // 关闭表单
+            closeEditForm();
+        }
+        
+        // 键盘事件
+        document.addEventListener('keydown', (e) => {
+            // ESC键关闭模态框或编辑表单
+            if (e.key === 'Escape') {
+                if (editForm.classList.contains('active')) {
+                    closeEditForm();
+                } else if (photoModal.classList.contains('active')) {
+                    closePhotoModal();
+                }
+            }
+            
+            // Ctrl+S 保存编辑
+            if ((e.ctrlKey || e.metaKey) && e.key === 's' && editForm.classList.contains('active')) {
+                e.preventDefault();
+                savePhotoEdit();
+            }
+        });
+    </script>
+</body>
+</html>
