@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三丽鸥幸福照片墙</title>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF9DE2',
+            secondary: '#9DDBFF',
+            accent: '#FFC2E2',
+            dark: '#8A7CFF',
+            light: '#FFF0F7',
+            success: '#9EFFA7',
+            warning: '#FFEE93',
+            info: '#93D5FF',
+            danger: '#FF9E9E',
+          },
+          fontFamily: {
+            sans: ['Arial Rounded MT Bold', 'Avenir', 'Helvetica', 'Arial', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'twinkle': 'twinkle 2s ease-in-out infinite',
+            'slide-in': 'slideIn 0.5s ease-out forwards',
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+            'shooting': 'shooting 3s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            twinkle: {
+              '0%, 100%': { opacity: 1 },
+              '50%': { opacity: 0.5 },
+            },
+            slideIn: {
+              '0%': { transform: 'translateX(-100%)', opacity: 0 },
+              '100%': { transform: 'translateX(0)', opacity: 1 },
+            },
+            fadeIn: {
+              '0%': { opacity: 0 },
+              '100%': { opacity: 1 },
+            },
+            shooting: {
+              '0%': { transform: 'translateX(-100px) translateY(0)', opacity: 0 },
+              '10%': { opacity: 1 },
+              '90%': { opacity: 1 },
+              '100%': { transform: 'translateX(calc(100vw + 100px)) translateY(100px)', opacity: 0 },
+            },
+          },
+          boxShadow: {
+            'cute': '0 4px 0 0 rgba(0, 0, 0, 0.1)',
+            'hover': '0 8px 0 0 rgba(0, 0, 0, 0.15)',
+          },
+          borderRadius: {
+            'xl': '1rem',
+            '2xl': '1.5rem',
+            '3xl': '2rem',
+            '4xl': '2.5rem',
+            'full': '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .text-shadow-lg {
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+      }
+      .photo-frame {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        background-color: white;
+        padding: 10px;
+        border: 3px solid #FF9DE2;
+      }
+      .photo-frame:hover {
+        transform: translateY(-5px) rotate(1deg);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .photo-frame::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        background: linear-gradient(45deg, #FF9DE2, #9DDBFF, #FFC2E2, #8A7CFF);
+        z-index: -1;
+        border-radius: 1.25rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .photo-frame:hover::before {
+        opacity: 1;
+      }
+      .photo-inner {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0.5rem;
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+      /* 相框装饰元素 */
+      .frame-decoration {
+        position: absolute;
+        z-index: 10;
+      }
+      .frame-top-left {
+        top: -10px;
+        left: -10px;
+        width: 24px;
+        height: 24px;
+        background-color: #FFEE93;
+        border-radius: 50%;
+        transform: rotate(-45deg);
+      }
+      .frame-top-right {
+        top: -10px;
+        right: -10px;
+        width: 24px;
+        height: 24px;
+        background-color: #9EFFA7;
+        border-radius: 50%;
+        transform: rotate(45deg);
+      }
+      .frame-bottom-left {
+        bottom: -10px;
+        left: -10px;
+        width: 24px;
+        height: 24px;
+        background-color: #93D5FF;
+        border-radius: 50%;
+        transform: rotate(45deg);
+      }
+      .frame-bottom-right {
+        bottom: -10px;
+        right: -10px;
+        width: 24px;
+        height: 24px;
+        background-color: #FFC2E2;
+        border-radius: 50%;
+        transform: rotate(-45deg);
+      }
+      .danmaku {
+        position: absolute;
+        white-space: nowrap;
+        color: white;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        animation: danmakuMove linear forwards;
+        z-index: 10;
+        background-color: rgba(236, 72, 153, 0.7);
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+      }
+      @keyframes danmakuMove {
+        from { transform: translateX(100%); }
+        to { transform: translateX(-100%); }
+      }
+      .star {
+        position: absolute;
+        background-color: white;
+        border-radius: 50%;
+        animation: twinkle 2s infinite alternate;
+      }
+      .shooting-star {
+        position: absolute;
+        width: 50px;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,1), rgba(255,255,255,0));
+        animation: shooting 3s linear infinite;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-content {
+        max-width: 90%;
+        max-height: 90%;
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+      }
+      .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 101;
+      }
+      .upload-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #FF9DE2;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 50;
+      }
+      .upload-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      }
+      .comment-input {
+        border-radius: 2rem;
+        padding: 0.5rem 1rem;
+        border: 2px solid #F9A8D4;
+        outline: none;
+        transition: all 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.9);
+      }
+      .comment-input:focus {
+        border-color: #EC4899;
+        box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+      }
+      .comment-btn {
+        border-radius: 2rem;
+        padding: 0.5rem 1rem;
+        background-color: #F9A8D4;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .comment-btn:hover {
+        background-color: #EC4899;
+        transform: translateY(-2px);
+      }
+      .danmaku-toggle {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 2rem;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+        z-index: 101;
+      }
+      .delete-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 158, 158, 0.8);
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .photo-frame:hover .delete-btn {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body class="bg-light min-h-screen font-sans" style="background-image: url('https://p9-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/7d00997b1c1643f08e170986b0d235df~tplv-a9rns2rl98-image.image?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1767341450&x-signature=0lFNqLGJN7p2kx3LpiOCrrJ23BE%3D'); background-size: cover; background-position: center; background-attachment: fixed;">
+  <!-- 流星背景 -->
+  <div id="stars-container" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0"></div>
+  
+  <!-- 页面标题 -->
+  <header class="relative z-10 py-6 px-4 text-center">
+    <div class="flex justify-center items-center">
+      <div class="relative">
+        <img id="header-sticker" src="https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/bc79c04601d8479f809cb093081604f0.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=l2cMp88wvmpKFJiy4piZU2H0uIQ%3D" alt="三丽鸥贴纸" class="w-24 h-24 mr-3 animate-float">
+      </div>
+      <h1 class="text-4xl font-bold text-pink-500 text-shadow-lg">幸福照片墙</h1>
+    </div>
+  </header>
+  
+  <!-- 照片墙区域 -->
+  <main class="relative z-10 container mx-auto px-4 py-8">
+    <div id="photo-wall" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <!-- 照片将通过JavaScript动态添加 -->
+    </div>
+    
+    <!-- 空状态提示 -->
+    <div id="empty-state" class="text-center py-16 animate-fade-in relative">
+      <div class="relative inline-block">
+        <img id="empty-sticker" src="https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/0ba910ffb4e546f495f9519f81b78030.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=QsSi2mOXLKq7m%2BVpNFUNUPwWuvA%3D" alt="三丽鸥贴纸" class="w-48 h-48 mx-auto mb-4 animate-float z-10 relative">
+      </div>
+      <button id="empty-upload-btn" class="bg-pink-400 hover:bg-pink-500 text-white font-bold py-3 px-6 rounded-full shadow-cute hover:shadow-hover transition-all duration-300 transform hover:-translate-y-1">
+        <i class="fa fa-plus mr-2"></i>上传照片
+      </button>
+    </div>
+  </main>
+  
+  <!-- 上传按钮已移除 -->
+  
+  <!-- 上传模态框 -->
+  <div id="upload-modal" class="modal">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full mx-4 animate-slide-in">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-2xl font-bold text-pink-500">上传照片</h3>
+        <span class="modal-close text-2xl cursor-pointer">&times;</span>
+      </div>
+      <div class="mb-4">
+        <label class="block text-pink-600 mb-2">选择照片</label>
+        <div class="border-2 border-dashed border-pink-400 rounded-2xl p-6 text-center cursor-pointer hover:bg-light transition-colors duration-300">
+          <input type="file" id="photo-input" class="hidden" accept="image/*">
+          <i class="fa fa-cloud-upload text-4xl text-pink-400 mb-2"></i>
+          <p class="text-pink-600">点击或拖拽照片到这里</p>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block text-pink-600 mb-2">照片描述 (可选)</label>
+        <textarea id="photo-description" class="w-full p-3 border-2 border-pink-400 rounded-2xl focus:outline-none focus:border-pink-600" rows="3" placeholder="添加一些关于这张照片的美好回忆..."></textarea>
+      </div>
+      <div class="mb-4">
+        <label class="block text-pink-600 mb-2">选择贴纸装饰 (可选)</label>
+        <div id="sticker-selector" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 border-2 border-pink-400 rounded-2xl">
+          <!-- 贴纸将通过JavaScript动态添加 -->
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button id="cancel-upload" class="bg-pink-200 hover:bg-pink-300 text-pink-600 font-bold py-2 px-6 rounded-full mr-2">取消</button>
+        <button id="confirm-upload" class="bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded-full">上传</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 查看照片模态框 -->
+  <div id="view-modal" class="modal">
+    <div class="modal-content bg-white rounded-3xl overflow-hidden max-w-4xl w-full mx-4">
+      <span class="modal-close">&times;</span>
+      <div class="relative">
+        <img id="view-photo" src="" alt="查看照片" class="w-full h-auto">
+        <div class="danmaku-toggle">
+          <i class="fa fa-comment"></i> 弹幕: <span id="danmaku-status">开启</span>
+        </div>
+        <div id="danmaku-container" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+      </div>
+      <div class="p-4 bg-light">
+        <p id="view-description" class="text-dark mb-4"></p>
+        <div class="flex items-center">
+          <input type="text" id="comment-input" class="comment-input flex-grow mr-2" placeholder="添加评论...">
+          <button id="comment-btn" class="comment-btn">
+            <i class="fa fa-paper-plane"></i>
+          </button>
+        </div>
+        <div id="comments-container" class="mt-4 space-y-2 max-h-40 overflow-y-auto">
+          <!-- 评论将通过JavaScript动态添加 -->
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 成功提示 -->
+  <div id="success-toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-success text-white px-6 py-3 rounded-full shadow-lg z-50 hidden">
+    <i class="fa fa-check-circle mr-2"></i>
+    <span>操作成功！</span>
+  </div>
+  
+  <script>
+    // 初始化数据
+    let photos = JSON.parse(localStorage.getItem('sanrioPhotos')) || [];
+    let currentPhotoIndex = -1;
+    let danmakuEnabled = true;
+    let danmakuInterval;
+    
+    // 三丽鸥贴纸数组
+    const sanrioStickers = [
+      "https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/0ba910ffb4e546f495f9519f81b78030.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=QsSi2mOXLKq7m%2BVpNFUNUPwWuvA%3D",
+      "https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/713bbe457f0b44ef8400d8230f82b809.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=eWc88zGgg6kYsq0C4LerQoVqbH4%3D",
+      "https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/15d6a6e3f6b84494a093f1973d48b0ff.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=I8LXpOC7pkK6iErFJ%2FeoMwmwOps%3D",
+      "https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/bc79c04601d8479f809cb093081604f0.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=l2cMp88wvmpKFJiy4piZU2H0uIQ%3D",
+      "https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/4877525f90524e08bede34562586c513.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=ggYPwrahrenyb1LlOLYteJ%2FH41Q%3D",
+      "https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/0081037a78444932accdfe0d6efd2903.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=Ss%2BYvfgioM17ytyYin52NKt%2BaYM%3D",
+      "https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/284e2d216bc14010a7db394050edce14.png~tplv-a9rns2rl98-24:720:720.png?rcl=2025120316092491AF5E86B232CFFBB451&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765354164&x-signature=dAchVE8fbBO84DA7mratp8vyJcI%3D"
+    ];
+    
+    // 获取随机贴纸
+    function getRandomSticker() {
+      return sanrioStickers[Math.floor(Math.random() * sanrioStickers.length)];
+    }
+    
+    // DOM元素
+    const photoWall = document.getElementById('photo-wall');
+    const emptyState = document.getElementById('empty-state');
+    const emptyUploadBtn = document.getElementById('empty-upload-btn');
+    const uploadModal = document.getElementById('upload-modal');
+    const viewModal = document.getElementById('view-modal');
+    const photoInput = document.getElementById('photo-input');
+    const photoDescription = document.getElementById('photo-description');
+    const stickerSelector = document.getElementById('sticker-selector');
+    const confirmUpload = document.getElementById('confirm-upload');
+    const cancelUpload = document.getElementById('cancel-upload');
+    const modalCloses = document.querySelectorAll('.modal-close');
+    const viewPhoto = document.getElementById('view-photo');
+    const viewDescription = document.getElementById('view-description');
+    const commentInput = document.getElementById('comment-input');
+    const commentBtn = document.getElementById('comment-btn');
+    const commentsContainer = document.getElementById('comments-container');
+    const danmakuToggle = document.querySelector('.danmaku-toggle');
+    const danmakuStatus = document.getElementById('danmaku-status');
+    const danmakuContainer = document.getElementById('danmaku-container');
+    const successToast = document.getElementById('success-toast');
+    const starsContainer = document.getElementById('stars-container');
+    const headerSticker = document.getElementById('header-sticker');
+    const emptySticker = document.getElementById('empty-sticker');
+    
+    // 初始化页面
+    function initPage() {
+      renderPhotos();
+      createStars();
+      createShootingStars();
+      initStickerSelector();
+      setRandomStickers();
+    }
+    
+    // 初始化贴纸选择器
+    function initStickerSelector() {
+      stickerSelector.innerHTML = '';
+      sanrioStickers.forEach((stickerUrl, index) => {
+        const stickerItem = document.createElement('div');
+        stickerItem.className = 'sticker-item w-16 h-16 cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-pink-400 transition-all duration-300';
+        stickerItem.innerHTML = `<img src="${stickerUrl}" alt="贴纸 ${index + 1}" class="w-full h-full object-contain">`;
+        stickerItem.addEventListener('click', () => {
+          // 移除其他贴纸的选中状态
+          document.querySelectorAll('.sticker-item').forEach(item => {
+            item.classList.remove('border-pink-400');
+            item.classList.add('border-transparent');
+          });
+          // 添加当前贴纸的选中状态
+          stickerItem.classList.remove('border-transparent');
+          stickerItem.classList.add('border-pink-400');
+          // 存储选中的贴纸
+          stickerItem.dataset.selected = 'true';
+        });
+        stickerSelector.appendChild(stickerItem);
+      });
+    }
+    
+    // 设置随机贴纸
+    function setRandomStickers() {
+      // 为标题和空状态设置随机贴纸
+      if (headerSticker) {
+        headerSticker.src = getRandomSticker();
+      }
+      if (emptySticker) {
+        emptySticker.src = getRandomSticker();
+      }
+      
+      // 每30秒随机切换一次贴纸
+      setInterval(() => {
+        if (headerSticker) {
+          headerSticker.src = getRandomSticker();
+        }
+        if (emptySticker && emptyState.classList.contains('animate-fade-in')) {
+          emptySticker.src = getRandomSticker();
+        }
+      }, 30000);
+    }
+    
+    // 渲染照片墙
+    function renderPhotos() {
+      if (photos.length === 0) {
+        photoWall.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+      } else {
+        photoWall.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        
+        photoWall.innerHTML = '';
+        photos.forEach((photo, index) => {
+          const photoElement = document.createElement('div');
+          photoElement.className = 'photo-frame animate-fade-in';
+          photoElement.style.animationDelay = `${index * 0.1}s`;
+          
+          // 使用粉色系相框颜色
+          const frameColors = ['#F9A8D4', '#F472B6', '#EC4899', '#DB2777', '#BE185D'];
+          const randomColor = frameColors[Math.floor(Math.random() * frameColors.length)];
+          
+          // 构建照片HTML，包含贴纸
+          let photoHTML = `
+            <div class="relative">
+              <div class="photo-inner">
+                <img src="${photo.url}" alt="${photo.description}" class="w-full h-64 object-cover">
+                <div class="delete-btn" data-index="${index}">
+                  <i class="fa fa-trash"></i>
+                </div>
+          `;
+          
+          // 如果有贴纸，添加到照片上
+          if (photo.sticker) {
+            photoHTML += `
+              <div class="absolute -top-4 -right-4 w-16 h-16 transform rotate-12 animate-float">
+                <img src="${photo.sticker}" alt="贴纸" class="w-full h-full object-contain">
+              </div>
+            `;
+          }
+          
+          photoHTML += `
+              </div>
+              <!-- 相框装饰元素 -->
+              <div class="frame-decoration frame-top-left"></div>
+              <div class="frame-decoration frame-top-right"></div>
+              <div class="frame-decoration frame-bottom-left"></div>
+              <div class="frame-decoration frame-bottom-right"></div>
+            </div>
+            <div class="p-3 bg-white">
+              <p class="text-pink-600 truncate">${photo.description || '无描述'}</p>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-xs text-pink-400">${formatDate(photo.date)}</span>
+                <span class="text-xs text-pink-500">${photo.comments.length} 条评论</span>
+              </div>
+            </div>
+          `;
+          
+          photoElement.innerHTML = photoHTML;
+          
+          // 设置相框颜色
+          photoElement.style.borderColor = randomColor;
+          
+          photoElement.addEventListener('click', (e) => {
+            if (!e.target.closest('.delete-btn')) {
+              openViewModal(index);
+            }
+          });
+          
+          photoWall.appendChild(photoElement);
+        });
+        
+        // 添加删除按钮事件
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const index = parseInt(btn.dataset.index);
+            deletePhoto(index);
+          });
+        });
+      }
+    }
+    
+    // 格式化日期
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+    }
+    
+    // 打开上传模态框
+    function openUploadModal() {
+      uploadModal.style.display = 'flex';
+      uploadModal.classList.add('animate-fade-in');
+    }
+    
+    // 关闭上传模态框
+    function closeUploadModal() {
+      uploadModal.style.display = 'none';
+      photoInput.value = '';
+      photoDescription.value = '';
+    }
+    
+    // 打开查看模态框
+    function openViewModal(index) {
+      currentPhotoIndex = index;
+      const photo = photos[index];
+      
+      viewPhoto.src = photo.url;
+      viewDescription.textContent = photo.description || '无描述';
+      
+      renderComments(photo.comments);
+      
+      viewModal.style.display = 'flex';
+      viewModal.classList.add('animate-fade-in');
+      
+      // 启用弹幕
+      danmakuEnabled = true;
+      danmakuStatus.textContent = '开启';
+      startDanmaku(photo.comments);
+    }
+    
+    // 关闭查看模态框
+    function closeViewModal() {
+      viewModal.style.display = 'none';
+      currentPhotoIndex = -1;
+      stopDanmaku();
+    }
+    
+    // 渲染评论
+    function renderComments(comments) {
+      commentsContainer.innerHTML = '';
+      
+      if (comments.length === 0) {
+        commentsContainer.innerHTML = '<p class="text-gray-400 text-center">还没有评论，快来添加第一条吧！</p>';
+        return;
+      }
+      
+      comments.forEach(comment => {
+        const commentElement = document.createElement('div');
+        commentElement.className = 'bg-white p-2 rounded-lg shadow-sm';
+        commentElement.innerHTML = `
+          <p class="text-dark">${comment.text}</p>
+          <span class="text-xs text-gray-400">${formatDate(comment.date)}</span>
+        `;
+        commentsContainer.appendChild(commentElement);
+      });
+      
+      // 滚动到底部
+      commentsContainer.scrollTop = commentsContainer.scrollHeight;
+    }
+    
+    // 添加评论
+    function addComment() {
+      const text = commentInput.value.trim();
+      
+      if (!text || currentPhotoIndex === -1) return;
+      
+      const comment = {
+        text,
+        date: new Date().toISOString()
+      };
+      
+      photos[currentPhotoIndex].comments.push(comment);
+      savePhotos();
+      
+      renderComments(photos[currentPhotoIndex].comments);
+      renderPhotos();
+      
+      commentInput.value = '';
+      
+      showToast('评论添加成功！');
+    }
+    
+    // 删除照片
+    function deletePhoto(index) {
+      if (confirm('确定要删除这张照片吗？')) {
+        photos.splice(index, 1);
+        savePhotos();
+        renderPhotos();
+        showToast('照片已删除！');
+      }
+    }
+    
+    // 上传照片
+    function uploadPhoto() {
+      const file = photoInput.files[0];
+      
+      if (!file) {
+        alert('请选择一张照片！');
+        return;
+      }
+      
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const photo = {
+          url: e.target.result,
+          description: photoDescription.value.trim(),
+          date: new Date().toISOString(),
+          comments: []
+        };
+        
+        photos.push(photo);
+        savePhotos();
+        renderPhotos();
+        closeUploadModal();
+        showToast('照片上传成功！');
+      };
+      
+      reader.readAsDataURL(file);
+    }
+    
+    // 保存照片到本地存储
+    function savePhotos() {
+      localStorage.setItem('sanrioPhotos', JSON.stringify(photos));
+    }
+    
+    // 显示提示
+    function showToast(message) {
+      successToast.querySelector('span').textContent = message;
+      successToast.classList.remove('hidden');
+      successToast.classList.add('animate-fade-in');
+      
+      setTimeout(() => {
+        successToast.classList.add('hidden');
+      }, 3000);
+    }
+    
+    // 切换弹幕
+    function toggleDanmaku() {
+      danmakuEnabled = !danmakuEnabled;
+      danmakuStatus.textContent = danmakuEnabled ? '开启' : '关闭';
+      
+      if (danmakuEnabled) {
+        startDanmaku(photos[currentPhotoIndex].comments);
+      } else {
+        stopDanmaku();
+      }
+    }
+    
+    // 开始弹幕
+    function startDanmaku(comments) {
+      stopDanmaku();
+      
+      if (!comments.length) return;
+      
+      danmakuInterval = setInterval(() => {
+        if (!danmakuEnabled) return;
+        
+        const randomComment = comments[Math.floor(Math.random() * comments.length)];
+        createDanmaku(randomComment.text);
+      }, 2000);
+    }
+    
+    // 停止弹幕
+    function stopDanmaku() {
+      if (danmakuInterval) {
+        clearInterval(danmakuInterval);
+      }
+      
+      danmakuContainer.innerHTML = '';
+    }
+    
+    // 创建弹幕
+    function createDanmaku(text) {
+      const danmaku = document.createElement('div');
+      danmaku.className = 'danmaku';
+      danmaku.textContent = text;
+      
+      // 随机位置和颜色
+      const top = Math.floor(Math.random() * (danmakuContainer.clientHeight - 40));
+      const colors = ['#FF9DE2', '#9DDBFF', '#FFC2E2', '#8A7CFF', '#FFF0F7', '#9EFFA7', '#FFEE93', '#93D5FF'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      
+      danmaku.style.top = `${top}px`;
+      danmaku.style.color = color;
+      danmaku.style.fontSize = `${Math.floor(Math.random() * 8) + 14}px`;
+      
+      // 设置动画
+      const duration = Math.floor(Math.random() * 5) + 10;
+      danmaku.style.animationName = 'danmakuMove';
+      danmaku.style.animationDuration = `${duration}s`;
+      danmaku.style.animationTimingFunction = 'linear';
+      danmaku.style.animationFillMode = 'forwards';
+      
+      danmakuContainer.appendChild(danmaku);
+      
+      // 动画结束后移除
+      setTimeout(() => {
+        danmaku.remove();
+      }, duration * 1000);
+    }
+    
+    // 创建星星背景
+    function createStars() {
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        const size = Math.random() * 3 + 1;
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const delay = Math.random() * 5;
+        
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${x}%`;
+        star.style.top = `${y}%`;
+        star.style.animationDelay = `${delay}s`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+    
+    // 创建流星
+    function createShootingStars() {
+      setInterval(() => {
+        const shootingStar = document.createElement('div');
+        shootingStar.className = 'shooting-star';
+        
+        const x = Math.random() * 100;
+        const y = Math.random() * 50;
+        const size = Math.random() * 30 + 20;
+        const delay = Math.random() * 5;
+        
+        shootingStar.style.width = `${size}px`;
+        shootingStar.style.left = `${x}%`;
+        shootingStar.style.top = `${y}%`;
+        shootingStar.style.animationDelay = `${delay}s`;
+        
+        starsContainer.appendChild(shootingStar);
+        
+        setTimeout(() => {
+          shootingStar.remove();
+        }, 3000);
+      }, 2000);
+    }
+    
+    // 事件监听
+    uploadBtn.addEventListener('click', openUploadModal);
+    emptyUploadBtn.addEventListener('click', openUploadModal);
+    
+    photoInput.addEventListener('change', function() {
+      if (this.files.length > 0) {
+        const fileName = this.files[0].name;
+        this.previousElementSibling.querySelector('p').textContent = fileName;
+      }
+    });
+    
+    confirmUpload.addEventListener('click', uploadPhoto);
+    cancelUpload.addEventListener('click', closeUploadModal);
+    
+    modalCloses.forEach(close => {
+      close.addEventListener('click', function() {
+        if (this.closest('#upload-modal')) {
+          closeUploadModal();
+        } else {
+          closeViewModal();
+        }
+      });
+    });
+    
+    commentBtn.addEventListener('click', addComment);
+    commentInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        addComment();
+      }
+    });
+    
+    danmakuToggle.addEventListener('click', toggleDanmaku);
+    
+    // 点击模态框外部关闭
+    window.addEventListener('click', function(e) {
+      if (e.target === uploadModal) {
+        closeUploadModal();
+      } else if (e.target === viewModal) {
+        closeViewModal();
+      }
+    });
+    
+    // 拖拽上传
+    const dropArea = document.querySelector('.border-dashed');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+      dropArea.classList.add('bg-light');
+    }
+    
+    function unhighlight() {
+      dropArea.classList.remove('bg-light');
+    }
+    
+    dropArea.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length > 0) {
+        photoInput.files = files;
+        const fileName = files[0].name;
+        dropArea.querySelector('p').textContent = fileName;
+      }
+    }
+    
+    // 点击上传区域
+    dropArea.addEventListener('click', function() {
+      photoInput.click();
+    });
+    
+    // 初始化页面
+    initPage();
+  </script>
+</body>
+</html>
